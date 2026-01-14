@@ -1,14 +1,36 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
+
 <head>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+      <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyDcCZO2xTzyXSGqJsoy1V8QYnAjYfQJsaU",
+          authDomain: "ejc-pstmj.firebaseapp.com",
+          projectId: "ejc-pstmj",
+          appId: "1:756357646352:web:181d14ada49c466e79e295"
+        };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EJC PSTMJ</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" type="image/png" href="icon.png" />
+
 
   <style>
     :root{
