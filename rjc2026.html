@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RJC 2026 — Contagem Regressiva</title>
+
+  <style>
+    :root{
+      /* Paleta (a que você mandou ver) */
+      --c-cream:   #F2DFBE;
+      --c-gray1:   #D2D1CF;
+      --c-sage:    #E5E5D9;
+      --c-gold:    #C29A2B;
+      --c-caramel: #BF9A78;
+
+      --c-gold2:   #C8A14A;
+      --c-cream2:  #EFE6D8;
+      --c-brown:   #7A5A3A;
+
+      --c-off:     #FAF7F2;
+      --c-gray2:   #B9B2A8;
+      --c-wine:    #9E4A4A;
+
+      --white:     #FFFFFF;
+      --shadow:    rgba(0,0,0,0.08);
+      --maxw:      980px;
+      --radius:    12px;
+    }
+
+    *, *::before, *::after{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
+    body{
+      background: linear-gradient(135deg, var(--c-off) 0%, var(--c-sage) 100%);
+      font-family: Arial, sans-serif;
+      color: var(--c-brown);
+      min-height:100vh;
+      line-height:1.6;
+    }
+
+    header{
+      background: linear-gradient(135deg, rgba(194,154,43,0.22), rgba(242,223,190,0.55));
+      border-bottom: 1px solid rgba(122,90,58,0.10);
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .header-inner{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 20px 14px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: 0 8px 18px var(--shadow);
+    }
+
+    .brand h1{
+      font-size: 1.25rem;
+      line-height:1.1;
+      letter-spacing:.2px;
+      margin-bottom: 2px;
+    }
+
+    .brand p{
+      color: rgba(122,90,58,0.78);
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:.75rem 1.1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(122,90,58,0.12);
+      background: var(--c-cream);
+      color: var(--c-brown);
+      font-weight: 900;
+      cursor:pointer;
+      transition: background .2s, transform .08s;
+      text-decoration:none;
+    }
+    .btn:hover{ background: var(--c-off); }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      background: var(--c-gold);
+      color: var(--c-off);
+      border-color: rgba(0,0,0,0.06);
+    }
+    .btn-primary:hover{ background: var(--c-gold2); }
+
+    .section{
+      max-width: var(--maxw);
+      margin: 1.4rem auto;
+      padding: 1.4rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 22px var(--shadow);
+      border: 1px solid rgba(122,90,58,0.08);
+    }
+
+    .muted{ color: rgba(122,90,58,0.78); }
+
+    .countdown-wrap{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 1rem;
+      align-items:stretch;
+    }
+
+    .panel{
+      background: var(--c-off);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: 14px;
+      padding: 1.1rem;
+    }
+
+    .panel h2{
+      color: var(--c-gold);
+      margin-bottom: .75rem;
+      letter-spacing:.2px;
+    }
+
+    .big{
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height:1.2;
+      margin-bottom: .35rem;
+    }
+
+    .mini{
+      font-size: .92rem;
+      color: rgba(122,90,58,0.74);
+      font-weight: 700;
+    }
+
+    .grid{
+      margin-top: .9rem;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .6rem;
+    }
+
+    .box{
+      background: rgba(242,223,190,0.55);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: 14px;
+      padding: .75rem .55rem;
+      text-align:center;
+    }
+
+    .num{
+      font-size: 1.45rem;
+      font-weight: 1000;
+      letter-spacing:.3px;
+    }
+
+    .label{
+      font-size: .8rem;
+      font-weight: 900;
+      color: rgba(122,90,58,0.75);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing:.5px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .7rem;
+      border-radius: 999px;
+      background: rgba(158,74,74,0.12);
+      border: 1px solid rgba(158,74,74,0.22);
+      color: var(--c-wine);
+      font-weight: 900;
+      font-size: .9rem;
+      margin-top: .8rem;
+    }
+
+    footer{
+      text-align:center;
+      color: rgba(122,90,58,0.70);
+      font-size: .92rem;
+      padding: 1rem 12px 2rem;
+    }
+
+    @media (max-width: 760px){
+      .countdown-wrap{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <h1>RJC 2026</h1>
+        <p>Contagem regressiva para o início do retiro</p>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="index.html">Voltar</a>
+        <a class="btn btn-primary" href="#cronometro">Ver cronômetro</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" id="cronometro">
+    <div class="countdown-wrap">
+      <div class="panel">
+        <h2>Faltam</h2>
+
+        <div class="big" id="hoursText">— horas</div>
+        <div class="mini">
+          Início do RJC: <strong>14/02/2026 às 14:00</strong> (horário do Brasil)
+        </div>
+
+        <div class="grid" aria-label="Contagem regressiva">
+          <div class="box">
+            <div class="num" id="days">—</div>
+            <div class="label">dias</div>
+          </div>
+          <div class="box">
+            <div class="num" id="hours">—</div>
+            <div class="label">horas</div>
+          </div>
+          <div class="box">
+            <div class="num" id="minutes">—</div>
+            <div class="label">min</div>
+          </div>
+          <div class="box">
+            <div class="num" id="seconds">—</div>
+            <div class="label">seg</div>
+          </div>
+        </div>
+
+        <div class="badge" id="statusBadge" style="display:none;">
+          RJC já começou ✅
+        </div>
+      </div>
+
+      
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © <span id="year"></span> — RJC 2026
+  </footer>
+
+  <script>
+    // Alvo fixo com fuso do Brasil (-03:00)
+    const target = new Date("2026-02-14T14:00:00-03:00");
+
+    const el = {
+      days: document.getElementById("days"),
+      hours: document.getElementById("hours"),
+      minutes: document.getElementById("minutes"),
+      seconds: document.getElementById("seconds"),
+      hoursText: document.getElementById("hoursText"),
+      badge: document.getElementById("statusBadge"),
+      year: document.getElementById("year"),
+    };
+
+    el.year.textContent = new Date().getFullYear();
+
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    function tick(){
+      const now = new Date(); // usa o relógio do dispositivo
+      let diff = target.getTime() - now.getTime();
+
+      if (diff <= 0){
+        el.days.textContent = "0";
+        el.hours.textContent = "00";
+        el.minutes.textContent = "00";
+        el.seconds.textContent = "00";
+        el.hoursText.textContent = "0 horas";
+        el.badge.style.display = "inline-flex";
+        return;
+      }
+
+      // total em segundos
+      const totalSeconds = Math.floor(diff / 1000);
+
+      // total em horas (para o texto “faltam X horas”)
+      const totalHours = Math.floor(totalSeconds / 3600);
+
+      // quebra em dias/horas/min/seg
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      el.days.textContent = String(days);
+      el.hours.textContent = pad2(hours);
+      el.minutes.textContent = pad2(minutes);
+      el.seconds.textContent = pad2(seconds);
+
+      // “faltam tantas horas…”
+      el.hoursText.textContent = `${totalHours.toLocaleString("pt-BR")} horas`;
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  </script>
+
+</body>
+</html>

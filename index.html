@@ -1,100 +1,529 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Contagem Regressiva — EJC XIX PSTMJ</title>
-  <meta name="theme-color" content="#0f172a" />
+  <title>EJC PSTMJ</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
   <style>
     :root{
-      --bg:#0b1220; --text:#e5e7eb; --muted:#94a3b8;
-      --accent:#22d3ee; --accent2:#a78bfa;
+      /* PALETA EJC */
+      --c-cream:   #F2DFBE;
+      --c-gray1:   #D2D1CF;
+      --c-sage:    #E5E5D9;
+      --c-gold:    #C29A2B;
+      --c-caramel: #BF9A78;
+
+      --c-gold2:   #C8A14A;
+      --c-cream2:  #EFE6D8;
+      --c-brown:   #7A5A3A;
+
+      --c-off:     #FAF7F2;
+      --c-gray2:   #B9B2A8;
+      --c-wine:    #9E4A4A;
+
+      --white:         #FFFFFF;
+      --shadow:        rgba(0,0,0,0.08);
+      --header-height: 7.94cm;
+      --maxw:          980px;
+      --radius:        10px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+
+    *, *::before, *::after{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
-      background:
-        radial-gradient(1200px 600px at 20% -10%, #1e293b 0, transparent 60%),
-        radial-gradient(1200px 600px at 80% 110%, #0e7490 0, transparent 60%),
-        linear-gradient(180deg, #020617, #0b1220);
-      color:var(--text); display:grid; place-items:center; padding:24px;
+      background: linear-gradient(135deg, var(--c-off) 0%, var(--c-sage) 100%);
+      font-family: Arial, sans-serif;
+      color: var(--c-brown);
+      line-height:1.6;
+      min-height:100vh;
     }
-    .wrap{max-width:980px; width:100%}
-    .card{background:linear-gradient(180deg,#111827ee,#0b1220ee); backdrop-filter:blur(10px); border:1px solid #1f2937; border-radius:24px; box-shadow:0 10px 30px #0006; padding:28px}
-    header{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
-    h1{font-weight:800; letter-spacing:.3px; margin:0; font-size:clamp(24px,3.4vw,40px)}
-    .brand{display:flex; align-items:center; gap:12px}
-    .badge{font-size:12px; color:#0a0a0a; background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:6px 10px; border-radius:999px; font-weight:700; text-transform:uppercase; letter-spacing:.08em}
-    .subtitle{color:var(--muted); margin-top:6px}
-    .countdown{margin:28px 0 6px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px}
-    .unit{position:relative; text-align:center; padding:18px 12px; border-radius:18px; background:#0b1328; border:1px solid #1f304d}
-    .num{display:block; font-variant-numeric:tabular-nums; font-weight:800; font-size:clamp(28px,6vw,64px); line-height:1; letter-spacing:1px}
-    .label{display:block; margin-top:8px; color:var(--muted); text-transform:uppercase; font-size:12px; letter-spacing:.14em}
-    @media (max-width:560px){.countdown{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+    /* HEADER só com a arte (limpo) */
+    header{
+      height:var(--header-height);
+      background: url('cabecalho.png') center/cover no-repeat;
+      box-shadow: 0 2px 10px var(--shadow);
+      position:relative;
+      isolation:isolate;
+    }
+    header::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(
+        180deg,
+        rgba(0,0,0,0.10) 0%,
+        rgba(0,0,0,0.25) 60%,
+        rgba(0,0,0,0.15) 100%
+      );
+      z-index:0;
+      pointer-events:none;
+    }
+
+    nav{
+      background: var(--c-cream2);
+      box-shadow: 0 2px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      border-top: 1px solid rgba(122,90,58,0.08);
+      border-bottom: 1px solid rgba(122,90,58,0.08);
+    }
+
+    nav ul{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      list-style:none;
+      padding:.55rem .5rem;
+      flex-wrap:wrap;
+      gap: .5rem;
+    }
+
+    nav a{
+      text-decoration:none;
+      color: var(--c-brown);
+      font-weight: 800;
+      padding: .55rem .9rem;
+      border-radius: 8px;
+      transition: background .25s, transform .10s;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+    }
+    nav a:hover{ background: var(--c-off); }
+    nav a:active{ transform: scale(0.98); }
+
+    .nav-alert{
+      background: rgba(158,74,74,0.10);
+      border: 1px solid rgba(158,74,74,0.18);
+      color: var(--c-brown);
+    }
+    .nav-alert:hover{ background: rgba(158,74,74,0.14); }
+
+    .section{
+      background: var(--white);
+      margin: 1.6rem auto;
+      padding: 1.4rem;
+      max-width: var(--maxw);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px var(--shadow);
+      border: 1px solid rgba(122,90,58,0.08);
+    }
+
+    .section h2{
+      color: var(--c-gold);
+      margin-bottom: .9rem;
+      letter-spacing: .2px;
+    }
+
+    .muted{ color: rgba(122,90,58,0.75); }
+
+    #home h1{
+      font-size: 2rem;
+      line-height: 1.15;
+      margin-bottom: .35rem;
+      letter-spacing: .2px;
+    }
+
+    .pill{
+      display:inline-block;
+      margin-top:.5rem;
+      padding:.25rem .65rem;
+      border-radius: 999px;
+      background: rgba(194,154,43,0.12);
+      border: 1px solid rgba(194,154,43,0.20);
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:.6rem;
+      flex-wrap:wrap;
+      margin-top: 1rem;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:.75rem 1.1rem;
+      background: var(--c-cream);
+      color: var(--c-brown);
+      border: 1px solid rgba(122,90,58,0.12);
+      border-radius: 10px;
+      cursor:pointer;
+      transition: background .25s, transform .10s;
+      font-weight: 800;
+      text-decoration:none;
+    }
+    .btn:hover{ background: var(--c-off); }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      background: var(--c-gold);
+      color: var(--c-off);
+      border-color: rgba(0,0,0,0.06);
+    }
+    .btn-primary:hover{ background: var(--c-gold2); }
+
+    .btn-wine{
+      background: rgba(158,74,74,0.12);
+      border-color: rgba(158,74,74,0.25);
+    }
+    .btn-wine:hover{ background: rgba(158,74,74,0.16); }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: .9rem;
+    }
+
+    .card{
+      background: var(--c-off);
+      border-radius: 12px;
+      border: 1px solid rgba(122,90,58,0.10);
+      padding: 1rem;
+    }
+
+    .card .tag{
+      display:inline-block;
+      font-size: .78rem;
+      font-weight: 800;
+      padding: .18rem .55rem;
+      border-radius: 999px;
+      background: rgba(122,90,58,0.10);
+      color: var(--c-brown);
+      margin-bottom: .55rem;
+    }
+
+    .tag-urgent{
+      background: rgba(158,74,74,0.14);
+      color: var(--c-wine);
+      border: 1px solid rgba(158,74,74,0.22);
+    }
+
+    .card h3{
+      margin-bottom: .35rem;
+      font-size: 1.05rem;
+    }
+
+    .card p{
+      color: rgba(122,90,58,0.78);
+      font-size: .95rem;
+    }
+
+    .card .meta{
+      margin-top: .75rem;
+      font-size: .85rem;
+      color: rgba(122,90,58,0.68);
+      display:flex;
+      justify-content:space-between;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:.65rem;
+    }
+
+    .item{
+      display:flex;
+      gap:.9rem;
+      align-items:flex-start;
+      padding:.9rem;
+      border-radius: 12px;
+      background: var(--c-off);
+      border: 1px solid rgba(122,90,58,0.10);
+    }
+
+    .date{
+      min-width: 74px;
+      text-align:center;
+      border-radius: 12px;
+      padding:.45rem .55rem;
+      background: rgba(194,154,43,0.14);
+      border: 1px solid rgba(194,154,43,0.20);
+      font-weight: 900;
+      line-height:1.1;
+    }
+
+    .date small{
+      display:block;
+      font-weight: 800;
+      color: rgba(122,90,58,0.75);
+      margin-top: 3px;
+      letter-spacing:.2px;
+    }
+
+    #localizacao{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 1rem;
+    }
+
+    #map-container{
+      flex: 1 1 60%;
+      min-width: 280px;
+      height: 380px;
+      border-radius: 12px;
+      overflow:hidden;
+      border: 1px solid rgba(122,90,58,0.10);
+      box-shadow: 0 6px 18px var(--shadow);
+      background: var(--c-gray1);
+    }
+
+    #map-container img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    #ref-box{
+      flex: 0 0 35%;
+      min-width: 220px;
+    }
+
+    #ref-box ul{
+      list-style:none;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:.6rem;
+    }
+
+    #ref-box li{
+      background: var(--c-off);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: 12px;
+      padding: .8rem;
+    }
+
+    .credits{
+      font-size:.82rem;
+      color: rgba(122,90,58,0.60);
+      margin-top:.6rem;
+    }
+
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.62);
+      justify-content:center;
+      align-items:center;
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .modal-content{
+      background: var(--white);
+      width: min(720px, 96vw);
+      padding: 12px;
+      border-radius: 14px;
+      position:relative;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.20);
+    }
+
+    .modal-close{
+      position:absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 1.7rem;
+      cursor:pointer;
+      line-height:1;
+      color: rgba(122,90,58,0.85);
+      user-select:none;
+    }
+    .modal-close:hover{ color: var(--c-wine); }
+
+    .modal-content video{
+      width:100%;
+      border-radius: 10px;
+      display:block;
+      background: #000;
+    }
+
+    footer{
+      text-align:center;
+      font-size:.92rem;
+      color: rgba(122,90,58,0.70);
+      margin: 2rem 0 2.4rem;
+      padding: 0 12px;
+    }
+
+    @media (max-width: 560px){
+      #home h1{ font-size:1.6rem; }
+      nav ul{ justify-content:flex-start; }
+    }
   </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <div class="brand">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 3a9 9 0 1 0 9 9" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 7v6l4 2" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <div>
-            <h1>Contagem Regressiva — EJC XIX PSTMJ</h1>
-            <div class="subtitle">Acompanhe quanto falta para o início</div>
-          </div>
-        </div>
-        <span class="badge">Ao vivo em breve</span>
-      </header>
 
-      <div class="countdown" aria-live="polite" aria-atomic="true">
-        <div class="unit"><span id="days" class="num">00</span><span class="label">dias</span></div>
-        <div class="unit"><span id="hours" class="num">00</span><span class="label">horas</span></div>
-        <div class="unit"><span id="minutes" class="num">00</span><span class="label">minutos</span></div>
-        <div class="unit"><span id="seconds" class="num">00</span><span class="label">segundos</span></div>
+<body>
+
+  <!-- HEADER LIMPO (só a arte) -->
+  <header></header>
+
+  <nav>
+    <ul>
+      <li><a href="#home">Início</a></li>
+      <li><a href="rjc2026.html">RJC 2026</a></li>
+      <li><a href="calendario.html">Calendário</a></li>
+      <li><a href="#contato">Contato</a></li>
+      <li><a href="#localizacao">Localização</a></li>
+      <li><a href="https://instagram.com/" target="_blank">Instagram</a></li>
+    </ul>
+  </nav>
+
+  <main id="home" class="section">
+    <h1>EJC PSTMJ — Encontro de Jovens com Cristo</h1>
+    <p class="muted">
+      Aqui você encontra os <strong>avisos</strong>, as <strong>datas</strong> e as informações principais do nosso EJC.
+    </p>
+    <span class="pill">Site simples e evolutivo (vamos melhorando com o tempo)</span>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#avisos">Avisos do momento</a>
+      <a class="btn" href="#calendario">Ver calendário</a>
+      <button class="btn btn-wine" onclick="abrirVideo()">Abrir vídeo</button>
+    </div>
+  </main>
+
+  <section id="avisos" class="section">
+    <h2>Avisos</h2>
+    <p class="muted">Edite os cards abaixo com os avisos reais do seu EJC.</p>
+
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-urgent">Importante</span>
+        <h3>Grupão — Entrega de pastas</h3>
+        <p>“Há uma rosa e um menino em você.” 🌹✝️</p>
+        <div class="meta">
+          <span><strong>Data:</strong> 15/01</span>
+          <span><strong>Hora:</strong> 20:00h</span>
+        </div>
       </div>
+
+      <div class="card">
+        <span class="tag">Aviso</span>
+        <h3>Test01</h3>
+        <p>Definir cronograma e responsabilidades.</p>
+        <div class="meta">
+          <span><strong>Data:</strong> a confirmar</span>
+          <span><strong>Local:</strong> sala 01</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="tag">Atualização</span>
+        <h3>Lista de doações</h3>
+        <p>Alimentos e itens de apoio: confira o que ainda está faltando.</p>
+        <div class="meta">
+          <span><strong>Status:</strong> em aberto</span>
+          <span><strong>Contato:</strong> secretaria</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section id="contato" class="section">
+    <h2>Contato</h2>
+    <p class="muted">Troque pelos dados reais do seu EJC.</p>
+
+    <p><strong>Paróquia:</strong><br>Paróquia __________________________</p>
+    <p><strong>WhatsApp (coordenação):</strong><br>(__) _____-_____</p>
+    <p><strong>Instagram:</strong><br>
+      <a href="https://instagram.com/" target="_blank" style="color:var(--c-gold); font-weight:800;">
+        @ejc_pstmj
+      </a>
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://wa.me/55" target="_blank">Abrir WhatsApp</a>
+      <button class="btn" onclick="abrirVideo()">Ver vídeo</button>
+    </div>
+  </section>
+
+  <section id="localizacao" class="section">
+    <div id="map-container">
+      <img src="mapa-ejc.png" alt="Mapa de localização (troque a imagem)" />
+    </div>
+
+    <aside id="ref-box">
+      <h2>Local</h2>
+      <ul>
+        <li>
+          <strong>Paróquia</strong><br>
+          Endereço da paróquia aqui
+        </li>
+        <li>
+          <strong>Referência</strong><br>
+          Ponto de referência / rua / bairro
+        </li>
+      </ul>
+      <p class="credits">Dica: depois você pode colocar o Google Maps de verdade.</p>
+    </aside>
+  </section>
+
+  <div id="videoModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Vídeo do EJC">
+      <span class="modal-close" id="closeModal" aria-label="Fechar">&times;</span>
+      <video id="modalVideo" controls>
+        <source src="video-ejc.mp4" type="video/mp4" />
+        Seu navegador não suporta vídeo.
+      </video>
     </div>
   </div>
 
+  <footer>
+    © <span id="year"></span> EJC PSTMJ • Avisos e organização.
+  </footer>
+
   <script>
-  // Contador simples — sem botões nem configurações.
-  (function(){
-    const DEFAULT_START_ISO = '2025-09-12T18:00:00-03:00';
-    const el = {
-      d: document.getElementById('days'),
-      h: document.getElementById('hours'),
-      m: document.getElementById('minutes'),
-      s: document.getElementById('seconds'),
-    };
-    function pad(n){return String(n).padStart(2,'0')}
+    const modal = document.getElementById('videoModal');
+    const closeBtn = document.getElementById('closeModal');
+    const video = document.getElementById('modalVideo');
 
-    // Permite override por URL ?date=YYYY-MM-DDTHH:MM:SS-03:00 ou ?offset=6h
-    function parseOffset(str){ const m=/^([0-9]+)([smhdw])$/i.exec(str); if(!m) return null; const v=+m[1]; const u=m[2].toLowerCase(); const mult=u==='s'?1e3:u==='m'?6e4:u==='h'?36e5:u==='d'?864e5:6048e5; return v*mult }
-    const params = new URLSearchParams(location.search);
-    let target = new Date(DEFAULT_START_ISO);
-    if(params.has('date')){
-      const cand = new Date(params.get('date')); if(!isNaN(+cand)) target=cand;
-    } else if(params.has('offset')){
-      const ms = parseOffset(params.get('offset')); if(ms) target = new Date(Date.now()+ms);
+    function abrirVideo(){
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
     }
 
-    function setNumbers(d,h,m,s){ el.d.textContent=pad(d); el.h.textContent=pad(h); el.m.textContent=pad(m); el.s.textContent=pad(s); }
-    function tick(){
-      const diff = +target - Date.now();
-      if(diff<=0){ setNumbers(0,0,0,0); return clearInterval(t); }
-      const s = Math.floor(diff/1000)%60;
-      const m = Math.floor(diff/60000)%60;
-      const h = Math.floor(diff/3600000)%24;
-      const d = Math.floor(diff/86400000);
-      setNumbers(d,h,m,s);
+    function fechar(){
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      if (video){
+        video.pause();
+        video.currentTime = 0;
+      }
     }
-    tick();
-    const t = setInterval(tick,1000);
-  })();
+
+    closeBtn.addEventListener('click', fechar);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) fechar();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') fechar();
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+
 </body>
 </html>
+

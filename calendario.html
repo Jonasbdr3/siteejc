@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendário — EJC PSTMJ</title>
+
+  <style>
+    :root{
+      --c-cream:   #F2DFBE;
+      --c-sage:    #E5E5D9;
+      --c-gold:    #C29A2B;
+      --c-gold2:   #C8A14A;
+      --c-brown:   #7A5A3A;
+      --c-off:     #FAF7F2;
+      --c-cream2:  #EFE6D8;
+      --white:     #FFFFFF;
+      --shadow:    rgba(0,0,0,0.10);
+      --radius:    12px;
+      --maxw:      980px;
+    }
+
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
+    body{
+      background: linear-gradient(135deg, var(--c-off), var(--c-sage));
+      font-family: Arial, sans-serif;
+      color: var(--c-brown);
+      min-height:100vh;
+      line-height:1.6;
+    }
+
+    header{
+      height: 240px;
+      background: url('cabecalho.png') center/cover no-repeat;
+      box-shadow: 0 2px 10px var(--shadow);
+      position:relative;
+      isolation:isolate;
+    }
+    header::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18));
+      pointer-events:none;
+    }
+
+    nav{
+      background: var(--c-cream2);
+      box-shadow: 0 2px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-top: 1px solid rgba(122,90,58,0.08);
+      border-bottom: 1px solid rgba(122,90,58,0.08);
+    }
+    nav .nav-inner{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: .6rem .8rem;
+      display:flex;
+      gap:.8rem;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    nav a{
+      text-decoration:none;
+      font-weight:900;
+      color: var(--c-brown);
+      padding:.5rem .85rem;
+      border-radius: 10px;
+      transition: background .2s, transform .08s;
+    }
+    nav a:hover{ background: var(--c-off); }
+    nav a:active{ transform: scale(0.98); }
+
+    main{
+      max-width: var(--maxw);
+      margin: 1.4rem auto 2rem;
+      padding: 0 .9rem;
+    }
+
+    .section{
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 26px var(--shadow);
+      border: 1px solid rgba(122,90,58,0.08);
+      padding: 1.2rem;
+    }
+
+    h1{
+      color: var(--c-gold);
+      margin-bottom: .35rem;
+      letter-spacing:.2px;
+      font-size: 1.7rem;
+    }
+    .muted{ color: rgba(122,90,58,0.74); }
+
+    /* LISTA / CARDS CLICÁVEIS */
+    .events{
+      margin-top: 1rem;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: .9rem;
+    }
+
+    .event{
+      text-align:left;
+      background: var(--c-off);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: 14px;
+      padding: 1rem;
+      cursor:pointer;
+      transition: transform .08s, background .2s, box-shadow .2s;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    }
+    .event:hover{
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+    }
+    .event:active{ transform: scale(0.99); }
+
+    .date{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      background: rgba(194,154,43,.14);
+      border: 1px solid rgba(194,154,43,.22);
+      border-radius: 12px;
+      padding: .55rem .7rem;
+      font-weight: 1000;
+      min-width: 74px;
+      line-height:1.05;
+    }
+    .date small{
+      margin-top: 4px;
+      font-weight: 900;
+      color: rgba(122,90,58,.74);
+      letter-spacing:.3px;
+    }
+
+    .event-top{
+      display:flex;
+      gap:.9rem;
+      align-items:flex-start;
+    }
+
+    .event h2{
+      font-size: 1.05rem;
+      margin: .1rem 0 .25rem;
+      color: var(--c-brown);
+    }
+    .event p{
+      color: rgba(122,90,58,0.78);
+      font-size: .95rem;
+    }
+
+    .hint{
+      margin-top: .65rem;
+      font-size: .86rem;
+      font-weight: 900;
+      color: rgba(122,90,58,0.68);
+    }
+
+    /* MODAL */
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.62);
+      align-items:center;
+      justify-content:center;
+      z-index: 2000;
+      padding: 16px;
+    }
+    .modal-content{
+      width: min(980px, 96vw);
+      background: var(--white);
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.22);
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(242,223,190,0.7), rgba(194,154,43,0.14));
+      border-bottom: 1px solid rgba(122,90,58,0.10);
+    }
+    .modal-title{
+      font-weight: 1000;
+      color: var(--c-brown);
+      letter-spacing:.2px;
+    }
+    .close{
+      cursor:pointer;
+      font-size: 1.7rem;
+      line-height:1;
+      padding: 4px 10px;
+      border-radius: 10px;
+      user-select:none;
+      color: rgba(122,90,58,0.85);
+    }
+    .close:hover{ background: rgba(0,0,0,0.05); }
+
+    .modal-body{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .modal-media{
+      background: var(--c-off);
+      border-right: 1px solid rgba(122,90,58,0.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 14px;
+      min-height: 340px;
+    }
+    .modal-media img{
+      width:100%;
+      height:auto;
+      max-height: 520px;
+      object-fit:contain;
+      border-radius: 14px;
+      border: 1px solid rgba(122,90,58,0.10);
+      background: #fff;
+    }
+
+    .modal-info{
+      padding: 14px;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap: .45rem .8rem;
+      margin-top: .6rem;
+      font-size: .95rem;
+    }
+    .kv b{ color: rgba(122,90,58,0.85); }
+    .divider{
+      height:1px;
+      background: rgba(122,90,58,0.10);
+      margin: .9rem 0;
+    }
+
+    .btns{
+      display:flex;
+      gap:.6rem;
+      flex-wrap:wrap;
+      margin-top: .8rem;
+    }
+    .btn{
+      display:inline-block;
+      padding:.7rem 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(122,90,58,0.12);
+      background: var(--c-cream);
+      color: var(--c-brown);
+      font-weight: 1000;
+      text-decoration:none;
+      transition: background .2s, transform .08s;
+    }
+    .btn:hover{ background: var(--c-off); }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      background: var(--c-gold);
+      color: var(--c-off);
+      border-color: rgba(0,0,0,0.06);
+    }
+    .btn-primary:hover{ background: var(--c-gold2); }
+
+    footer{
+      text-align:center;
+      padding: 1.2rem 12px 2rem;
+      font-size: .92rem;
+      color: rgba(122,90,58,0.70);
+    }
+
+    @media (max-width: 860px){
+      .modal-body{ grid-template-columns: 1fr; }
+      .modal-media{ border-right: none; border-bottom: 1px solid rgba(122,90,58,0.10); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header></header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">Início</a>
+      <a href="rjc2026.html">RJC 2026</a>
+      <a href="calendario.html">Calendário</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section">
+      <h1>Calendário — EJC PSTMJ</h1>
+      <p class="muted">Clique em cada dia para abrir a arte do evento e todas as informações.</p>
+
+      <div class="events">
+        <!-- EVENTO 1 -->
+        <button class="event" type="button"
+          data-title="Grupão do EJC"
+          data-date="14/01/2026"
+          data-time="20h"
+          data-place="Comunidade São José"
+          data-desc="Entrega de pastas e alinhamento geral."
+          data-image="evento-14jan.png"
+          data-insta="https://instagram.com/"
+          data-maps="https://maps.app.goo.gl/sFubTbFZh1VKXtAx7"
+        >
+          <div class="event-top">
+            <div class="date">14<small>JAN</small></div>
+            <div>
+              <h2>Grupão do EJC</h2>
+              <p>Entrega de pastas e alinhamento geral • 20h</p>
+              <div class="hint">Clique para ver a arte + detalhes</div>
+            </div>
+          </div>
+        </button>
+
+        <!-- EVENTO 2 -->
+        <button class="event" type="button"
+          data-title="Reunião"
+          data-date="20/01/2026"
+          data-time="a confirmar"
+          data-place="Sala 01 (troque aqui)"
+          data-desc="Organização geral e avisos."
+          data-image="evento-20jan.png"
+          data-insta="https://instagram.com/"
+          data-maps="https://maps.google.com/?q="
+        >
+          <div class="event-top">
+            <div class="date">20<small>JAN</small></div>
+            <div>
+              <h2>Reunião</h2>
+              <p>Organização geral e avisos • horário a confirmar</p>
+              <div class="hint">Clique para ver a arte + detalhes</div>
+            </div>
+          </div>
+        </button>
+
+        <!-- EVENTO 3 -->
+        <button class="event" type="button"
+          data-title="Ensaio / Formação"
+          data-date="02/02/2026"
+          data-time="a confirmar"
+          data-place="Paróquia (troque aqui)"
+          data-desc="Momento de oração + preparação."
+          data-image="evento-02fev.png"
+          data-insta="https://instagram.com/"
+          data-maps="https://maps.google.com/?q="
+        >
+          <div class="event-top">
+            <div class="date">02<small>FEV</small></div>
+            <div>
+              <h2>Ensaio / Formação</h2>
+              <p>Oração + preparação • local a confirmar</p>
+              <div class="hint">Clique para ver a arte + detalhes</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Detalhes do evento">
+      <div class="modal-head">
+        <div class="modal-title" id="mTitle">Evento</div>
+        <div class="close" id="mClose" aria-label="Fechar">&times;</div>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-media">
+          <img id="mImage" src="" alt="Arte do evento" />
+        </div>
+
+        <div class="modal-info">
+          <div class="kv">
+            <b>Data</b><span id="mDate">—</span>
+            <b>Hora</b><span id="mTime">—</span>
+            <b>Local</b><span id="mPlace">—</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <b style="display:block; margin-bottom:6px;">Informações</b>
+            <p id="mDesc" class="muted">—</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <b style="display:block; margin-bottom:6px;">Links</b>
+            <p class="muted" style="font-size:.95rem;">
+              • Instagram do post do evento<br>
+              • Localização no Google Maps
+            </p>
+          </div>
+
+          <div class="btns">
+            <a class="btn btn-primary" id="mInsta" href="#" target="_blank">Abrir no Instagram</a>
+            <a class="btn" id="mMaps" href="#" target="_blank">Abrir no Maps</a>
+          </div>
+
+          <p class="muted" style="margin-top:.8rem; font-size:.9rem;">
+            Dica: coloque as artes do evento na mesma pasta com estes nomes:
+            <b>evento-14jan.png</b>, <b>evento-20jan.png</b>, <b>evento-02fev.png</b>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © <span id="year"></span> — EJC PSTMJ
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const modal = document.getElementById("modal");
+    const mClose = document.getElementById("mClose");
+
+    const mTitle = document.getElementById("mTitle");
+    const mDate  = document.getElementById("mDate");
+    const mTime  = document.getElementById("mTime");
+    const mPlace = document.getElementById("mPlace");
+    const mDesc  = document.getElementById("mDesc");
+    const mImage = document.getElementById("mImage");
+    const mInsta = document.getElementById("mInsta");
+    const mMaps  = document.getElementById("mMaps");
+
+    function openModalFrom(el){
+      const data = el.dataset;
+
+      mTitle.textContent = data.title || "Evento";
+      mDate.textContent  = data.date  || "—";
+      mTime.textContent  = data.time  || "—";
+      mPlace.textContent = data.place || "—";
+      mDesc.textContent  = data.desc  || "—";
+
+      mImage.src = data.image || "";
+      mImage.alt = `Arte: ${data.title || "Evento"}`;
+
+      // links
+      mInsta.href = data.insta && data.insta.trim() ? data.insta : "#";
+      mMaps.href  = data.maps  && data.maps.trim()  ? data.maps  : "#";
+
+      modal.style.display = "flex";
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(){
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden", "true");
+      mImage.src = "";
+    }
+
+    document.querySelectorAll(".event").forEach(btn => {
+      btn.addEventListener("click", () => openModalFrom(btn));
+    });
+
+    mClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
+    });
+  </script>
+
+</body>
+</html>
