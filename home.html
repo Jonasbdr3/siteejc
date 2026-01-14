@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EJC PSTMJ</title>
+
+  <link rel="icon" type="image/png" href="icon.png" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <style>
+    /* Só mostra a página depois da autenticação */
+    body{ opacity: 0; transition: opacity .15s ease; }
+    body.auth-ok{ opacity: 1; }
+
+    :root{
+      --c-cream:   #F2DFBE;
+      --c-gray1:   #D2D1CF;
+      --c-sage:    #E5E5D9;
+      --c-gold:    #C29A2B;
+      --c-caramel: #BF9A78;
+
+      --c-gold2:   #C8A14A;
+      --c-cream2:  #EFE6D8;
+      --c-brown:   #7A5A3A;
+
+      --c-off:     #FAF7F2;
+      --c-gray2:   #B9B2A8;
+      --c-wine:    #9E4A4A;
+
+      --white:         #FFFFFF;
+      --shadow:        rgba(0,0,0,0.08);
+      --header-height: 7.94cm;
+      --maxw:          980px;
+      --radius:        10px;
+    }
+
+    *, *::before, *::after{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
+    body{
+      background: linear-gradient(135deg, var(--c-off) 0%, var(--c-sage) 100%);
+      font-family: Arial, sans-serif;
+      color: var(--c-brown);
+      line-height:1.6;
+      min-height:100vh;
+    }
+
+    /* LOADING OVERLAY */
+    #authLoading{
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      background: var(--c-off);
+      color: var(--c-brown);
+      font-family: Arial;
+      font-weight: 900;
+      z-index:9999;
+    }
+
+    header{
+      height:var(--header-height);
+      background: url('cabecalho.png') center/cover no-repeat;
+      box-shadow: 0 2px 10px var(--shadow);
+      position:relative;
+      isolation:isolate;
+    }
+    header::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(
+        180deg,
+        rgba(0,0,0,0.10) 0%,
+        rgba(0,0,0,0.25) 60%,
+        rgba(0,0,0,0.15) 100%
+      );
+      z-index:0;
+      pointer-events:none;
+    }
+
+    nav{
+      background: var(--c-cream2);
+      box-shadow: 0 2px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      border-top: 1px solid rgba(122,90,58,0.08);
+      border-bottom: 1px solid rgba(122,90,58,0.08);
+    }
+
+    nav ul{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      list-style:none;
+      padding:.55rem .5rem;
+      flex-wrap:wrap;
+      gap: .5rem;
+    }
+
+    nav a, nav button{
+      text-decoration:none;
+      color: var(--c-brown);
+      font-weight: 800;
+      padding: .55rem .9rem;
+      border-radius: 8px;
+      transition: background .25s, transform .10s;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    nav a:hover, nav button:hover{ background: var(--c-off); }
+    nav a:active, nav button:active{ transform: scale(0.98); }
+
+    /* Botão sair com destaque leve */
+    .btn-logout{
+      background: rgba(158,74,74,0.10);
+      border: 1px solid rgba(158,74,74,0.18);
+    }
+    .btn-logout:hover{ background: rgba(158,74,74,0.14); }
+
+    .section{
+      background: var(--white);
+      margin: 1.6rem auto;
+      padding: 1.4rem;
+      max-width: var(--maxw);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px var(--shadow);
+      border: 1px solid rgba(122,90,58,0.08);
+    }
+
+    .section h2{
+      color: var(--c-gold);
+      margin-bottom: .9rem;
+      letter-spacing: .2px;
+    }
+
+    .muted{ color: rgba(122,90,58,0.75); }
+
+    #home h1{
+      font-size: 2rem;
+      line-height: 1.15;
+      margin-bottom: .35rem;
+      letter-spacing: .2px;
+    }
+
+    .pill{
+      display:inline-block;
+      margin-top:.5rem;
+      padding:.25rem .65rem;
+      border-radius: 999px;
+      background: rgba(194,154,43,0.12);
+      border: 1px solid rgba(194,154,43,0.20);
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:.6rem;
+      flex-wrap:wrap;
+      margin-top: 1rem;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:.75rem 1.1rem;
+      background: var(--c-cream);
+      color: var(--c-brown);
+      border: 1px solid rgba(122,90,58,0.12);
+      border-radius: 10px;
+      cursor:pointer;
+      transition: background .25s, transform .10s;
+      font-weight: 800;
+      text-decoration:none;
+    }
+    .btn:hover{ background: var(--c-off); }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      background: var(--c-gold);
+      color: var(--c-off);
+      border-color: rgba(0,0,0,0.06);
+    }
+    .btn-primary:hover{ background: var(--c-gold2); }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: .9rem;
+    }
+
+    .card{
+      background: var(--c-off);
+      border-radius: 12px;
+      border: 1px solid rgba(122,90,58,0.10);
+      padding: 1rem;
+    }
+
+    .card .tag{
+      display:inline-block;
+      font-size: .78rem;
+      font-weight: 800;
+      padding: .18rem .55rem;
+      border-radius: 999px;
+      background: rgba(122,90,58,0.10);
+      color: var(--c-brown);
+      margin-bottom: .55rem;
+    }
+
+    .tag-urgent{
+      background: rgba(158,74,74,0.14);
+      color: var(--c-wine);
+      border: 1px solid rgba(158,74,74,0.22);
+    }
+
+    .card h3{
+      margin-bottom: .35rem;
+      font-size: 1.05rem;
+    }
+
+    .card p{
+      color: rgba(122,90,58,0.78);
+      font-size: .95rem;
+    }
+
+    .card .meta{
+      margin-top: .75rem;
+      font-size: .85rem;
+      color: rgba(122,90,58,0.68);
+      display:flex;
+      justify-content:space-between;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+
+    #localizacao{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 1rem;
+    }
+
+    #map-container{
+      flex: 1 1 60%;
+      min-width: 280px;
+      height: 380px;
+      border-radius: 12px;
+      overflow:hidden;
+      border: 1px solid rgba(122,90,58,0.10);
+      box-shadow: 0 6px 18px var(--shadow);
+      background: var(--c-gray1);
+    }
+
+    #map-container img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    #ref-box{
+      flex: 0 0 35%;
+      min-width: 220px;
+    }
+
+    #ref-box ul{
+      list-style:none;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:.6rem;
+    }
+
+    #ref-box li{
+      background: var(--c-off);
+      border: 1px solid rgba(122,90,58,0.10);
+      border-radius: 12px;
+      padding: .8rem;
+    }
+
+    .credits{
+      font-size:.82rem;
+      color: rgba(122,90,58,0.60);
+      margin-top:.6rem;
+    }
+
+    footer{
+      text-align:center;
+      font-size:.92rem;
+      color: rgba(122,90,58,0.70);
+      margin: 2rem 0 2.4rem;
+      padding: 0 12px;
+    }
+
+    @media (max-width: 560px){
+      #home h1{ font-size:1.6rem; }
+      nav ul{ justify-content:flex-start; }
+    }
+  </style>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDcCZO2xTzyXSGqJsoy1V8QYnAjYfQJsaU",
+      authDomain: "ejc-pstmj.firebaseapp.com",
+      projectId: "ejc-pstmj",
+      appId: "1:756357646352:web:181d14ada49c466e79e295"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    // Espera autenticação e só então mostra a página
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        document.body.classList.add("auth-ok");
+        const l = document.getElementById("authLoading");
+        if (l) l.remove();
+      } else {
+        window.location.replace("./index.html");
+      }
+    });
+
+    async function sair(){
+      try{
+        await firebase.auth().signOut();
+      }finally{
+        window.location.replace("./index.html");
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="authLoading">Carregando...</div>
+
+  <header></header>
+
+  <nav>
+    <ul>
+      <li><a href="#home">Início</a></li>
+      <li><a href="rjc2026.html">RJC 2026</a></li>
+      <li><a href="calendario.html">Calendário</a></li>
+      <li><a href="#contato">Contato</a></li>
+      <li><a href="#localizacao">Localização</a></li>
+      <li><a href="https://instagram.com/" target="_blank">Instagram</a></li>
+      <li><button class="btn-logout" onclick="sair()">Sair</button></li>
+    </ul>
+  </nav>
+
+  <main id="home" class="section">
+    <h1>EJC PSTMJ — Encontro de Jovens com Cristo</h1>
+    <p class="muted">
+      Aqui você encontra os <strong>avisos</strong>, as <strong>datas</strong> e as informações principais do nosso EJC.
+    </p>
+    <span class="pill">Site simples e evolutivo (vamos melhorando com o tempo)</span>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#avisos">Avisos do momento</a>
+      <a class="btn" href="calendario.html">Ver calendário</a>
+    </div>
+  </main>
+
+  <section id="avisos" class="section">
+    <h2>Avisos</h2>
+    <p class="muted">Edite os cards abaixo com os avisos reais do seu EJC.</p>
+
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-urgent">Importante</span>
+        <h3>Grupão — Entrega de pastas</h3>
+        <p>“Há uma rosa e um menino em você.” 🌹✝️</p>
+        <div class="meta">
+          <span><strong>Data:</strong> 15/01</span>
+          <span><strong>Hora:</strong> 20:00h</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="tag">Aviso</span>
+        <h3>Test01</h3>
+        <p>Definir cronograma e responsabilidades.</p>
+        <div class="meta">
+          <span><strong>Data:</strong> a confirmar</span>
+          <span><strong>Local:</strong> sala 01</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="tag">Atualização</span>
+        <h3>Lista de doações</h3>
+        <p>Alimentos e itens de apoio: confira o que ainda está faltando.</p>
+        <div class="meta">
+          <span><strong>Status:</strong> em aberto</span>
+          <span><strong>Contato:</strong> secretaria</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato" class="section">
+    <h2>Contato</h2>
+    <p class="muted">Troque pelos dados reais do seu EJC.</p>
+
+    <p><strong>Paróquia:</strong><br>Paróquia __________________________</p>
+    <p><strong>WhatsApp (coordenação):</strong><br>(__) _____-_____ </p>
+    <p><strong>Instagram:</strong><br>
+      <a href="https://instagram.com/" target="_blank" style="color:var(--c-gold); font-weight:800;">
+        @ejc_pstmj
+      </a>
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://wa.me/55" target="_blank">Abrir WhatsApp</a>
+    </div>
+  </section>
+
+  <section id="localizacao" class="section">
+    <div id="map-container">
+      <img src="mapa-ejc.png" alt="Mapa de localização (troque a imagem)" />
+    </div>
+
+    <aside id="ref-box">
+      <h2>Local</h2>
+      <ul>
+        <li>
+          <strong>Paróquia</strong><br>
+          Endereço da paróquia aqui
+        </li>
+        <li>
+          <strong>Referência</strong><br>
+          Ponto de referência / rua / bairro
+        </li>
+      </ul>
+      <p class="credits">Dica: depois você pode colocar o Google Maps de verdade.</p>
+    </aside>
+  </section>
+
+  <footer>
+    © <span id="year"></span> EJC PSTMJ • Avisos e organização.
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
